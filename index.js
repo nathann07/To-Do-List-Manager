@@ -4,7 +4,7 @@ const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
 
-// Parse JSON request bodies
+// Middleware to parse JSON request bodies
 app.use(bodyParser.json());
 
 // In-memory "database" for storing tasks
@@ -12,6 +12,11 @@ let tasks = [
   { id: 1, task: 'Write code', completed: false },
   { id: 2, task: 'Test API', completed: true }
 ];
+
+// Helper function to refresh IDs
+const refreshTaskIds = () => {
+  tasks = tasks.map((task, index) => ({ ...task, id: index + 1 }));
+};
 
 // GET /tasks - Fetch all tasks
 app.get('/tasks', (req, res) => {
@@ -30,6 +35,7 @@ app.post('/tasks', (req, res) => {
     completed: completed || false
   };
   tasks.push(newTask);
+  refreshTaskIds(); // Ensure IDs are accurate
   res.status(201).json(newTask);
 });
 
@@ -59,10 +65,11 @@ app.delete('/tasks/:id', (req, res) => {
   }
 
   tasks.splice(taskIndex, 1);
+  refreshTaskIds(); // Ensure IDs are accurate
   res.status(200).json({ message: 'Task deleted' });
 });
 
-// Start server
+// Start the server
 app.listen(port, () => {
   console.log(`To-Do API running at http://localhost:${port}`);
 });
